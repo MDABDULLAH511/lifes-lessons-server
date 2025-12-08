@@ -31,9 +31,9 @@ async function run() {
     // ===== ***** ===== Database Collection Create ===== ***** =====//
     const db = client.db("Life's_Lesson_DB");
     const userCollection = db.collection("users");
+    const lessonsCollection = db.collection("lessons");
 
     // ===== ===== Users Related Api ===== =====//
-
     // Get users API
     app.get("/users", async (req, res) => {
       const email = req.query.email;
@@ -74,6 +74,21 @@ async function run() {
       }
 
       const result = await userCollection.insertOne(user);
+      res.send(result);
+    });
+
+    // ===== ===== Lesson Related Api ===== =====//
+    // Get lesson API
+    app.get("/lessons", async (req, res) => {
+      const result = await lessonsCollection.find().toArray();
+      res.send(result);
+    });
+    //create Lessons. Post API
+    app.post("/lessons", async (req, res) => {
+      const lesson = req.body;
+      lesson.createdAt = new Date();
+
+      const result = await lessonsCollection.insertOne(lesson);
       res.send(result);
     });
 
