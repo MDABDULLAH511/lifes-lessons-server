@@ -29,7 +29,7 @@ async function run() {
     await client.connect();
 
     // ===== ***** ===== Database Collection Create ===== ***** =====//
-    const db = client.db("Lifes_Lession_DB");
+    const db = client.db("Life's_Lesson_DB");
     const userCollection = db.collection("users");
 
     // ===== ===== Users Related Api ===== =====//
@@ -47,12 +47,15 @@ async function run() {
       res.send(result);
     });
 
-    //get users by role
-    app.get("/users/:email/isPremium", async (req, res) => {
+    //get users by status (Membership / Role)
+    app.get("/users/:email/status", async (req, res) => {
       const email = req.params.email;
-      const query = { email };
-      const user = await userCollection.findOne(query);
-      res.send({ isPremium: user?.isPremium || false });
+      const user = await userCollection.findOne({ email });
+
+      res.send({
+        isPremium: user?.isPremium || false,
+        role: user?.role || "user",
+      });
     });
 
     //create user. Post API
@@ -60,6 +63,7 @@ async function run() {
       const user = req.body;
       user.createdAt = new Date();
       user.isPremium = false;
+      user.role = "user";
 
       //check user already exit or not
       const email = user.email;
