@@ -78,17 +78,68 @@ async function run() {
     });
 
     // ===== ===== Lesson Related Api ===== =====//
-    // Get lesson API
+    // Get API lessons (All and using email).
     app.get("/lessons", async (req, res) => {
-      const result = await lessonsCollection.find().toArray();
+      const { email } = req.query;
+
+      const query = {};
+
+      if (email) {
+        query.createdBy = email;
+      }
+
+      const cursor = lessonsCollection.find(query).sort({ createdAt: -1 });
+      const result = await cursor.toArray();
       res.send(result);
     });
-    //create Lessons. Post API
+
+    // Get API lessons. Get by ID
+    app.get("/lessons/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await lessonsCollection.findOne(query);
+      res.send(result);
+    });
+
+    //Post API Create Lessons.
     app.post("/lessons", async (req, res) => {
       const lesson = req.body;
       lesson.createdAt = new Date();
 
       const result = await lessonsCollection.insertOne(lesson);
+      res.send(result);
+    });
+
+    //Patch API, Update Lesson.
+    app.patch("/lessons/:id", async (req, res) => {
+      const lesson = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+
+      const updateDoc = {
+        $set: {
+          lessonTitle: lesson.lessonTitle,
+          category: lesson.category,
+          emotionalTone: lesson.emotionalTone,
+          privacy: lesson.privacy,
+          accessLevel: lesson.accessLevel,
+          lessonImage: lesson.lessonImage,
+          lessonDesc: lesson.lessonDesc,
+
+          lastUpdatedDate: new Date(),
+        },
+      };
+
+      const result = await lessonsCollection.updateOne(query, updateDoc);
+      res.send(result);
+    });
+
+    //Delete API Delete lesson.
+    app.delete("/lessons/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+
+      const result = await lessonsCollection.deleteOne(query);
       res.send(result);
     });
 
