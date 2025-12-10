@@ -80,12 +80,16 @@ async function run() {
     // ===== ===== Lesson Related Api ===== =====//
     // Get API lessons (All and using email).
     app.get("/lessons", async (req, res) => {
-      const { email } = req.query;
+      const { email, privacy } = req.query;
 
       const query = {};
 
       if (email) {
         query.createdBy = email;
+      }
+
+      if (privacy) {
+        query.privacy = "public";
       }
 
       const cursor = lessonsCollection.find(query).sort({ createdAt: -1 });
