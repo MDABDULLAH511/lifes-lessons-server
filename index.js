@@ -134,6 +134,34 @@ async function run() {
       res.send(result);
     });
 
+    //Patch API, Update Lesson Visibility  and Access Level
+    app.patch("/lessons/:id/status", async (req, res) => {
+      const id = req.params.id;
+      const { visibility, accessLevel } = req.body;
+      const query = { _id: new ObjectId(id) };
+
+      // Privacy
+      if (visibility) {
+        updateDoc = {
+          $set: {
+            privacy: visibility,
+            lastUpdatedDate: new Date(),
+          },
+        };
+      }
+      // Access Level
+      if (accessLevel) {
+        updateDoc = {
+          $set: {
+            accessLevel: accessLevel,
+            lastUpdatedDate: new Date(),
+          },
+        };
+      }
+      const result = await lessonsCollection.updateOne(query, updateDoc);
+      res.send(result);
+    });
+
     //Delete API Delete lesson.
     app.delete("/lessons/:id", async (req, res) => {
       const id = req.params.id;
