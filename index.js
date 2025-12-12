@@ -33,6 +33,7 @@ async function run() {
     const userCollection = db.collection("users");
     const lessonsCollection = db.collection("lessons");
     const commentsCollection = db.collection("comments");
+    const reportsCollection = db.collection("lessonReports");
 
     // ===== ===== Users Related Api ===== =====//
     // Get users API
@@ -210,6 +211,38 @@ async function run() {
       const commet = req.body;
 
       const result = await commentsCollection.insertOne(commet);
+      res.send(result);
+    });
+
+    // ===== ===== Lesson Report Related Api ===== =====//
+    // Get API
+    app.get("/reports", async (req, res) => {
+      const query = {};
+
+      const result = await reportsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    //Post API
+    app.post("/reports", async (req, res) => {
+      const report = req.body;
+      const { lessonId, reporterEmail } = report;
+
+      // Check if already reported or not
+      const existingReport = await reportsCollection.findOne({
+        lessonId,
+        reporterEmail,
+      });
+
+      if (existingReport) {
+        return res.status(400).send({
+          success: false,
+          message: "You already reported this lesson.",
+        });
+      }
+
+      // Added new report
+      const result = await reportsCollection.insertOne(report);
       res.send(result);
     });
 
