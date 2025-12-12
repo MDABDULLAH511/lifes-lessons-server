@@ -32,6 +32,7 @@ async function run() {
     const db = client.db("Life's_Lesson_DB");
     const userCollection = db.collection("users");
     const lessonsCollection = db.collection("lessons");
+    const commentsCollection = db.collection("comments");
 
     // ===== ===== Users Related Api ===== =====//
     // Get users API
@@ -185,6 +186,30 @@ async function run() {
       const query = { _id: new ObjectId(id) };
 
       const result = await lessonsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // ===== ===== Comments Related Api ===== =====//
+    // Get API
+    app.get("/comments", async (req, res) => {
+      const { lessonId } = req.query;
+
+      const query = {};
+
+      if (lessonId) {
+        query.lessonId = lessonId;
+      }
+
+      const cursor = commentsCollection.find(query).sort({ createdAt: -1 });
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // Post API
+    app.post("/comments", async (req, res) => {
+      const commet = req.body;
+
+      const result = await commentsCollection.insertOne(commet);
       res.send(result);
     });
 
