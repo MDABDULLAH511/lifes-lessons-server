@@ -80,7 +80,7 @@ async function run() {
     // ===== ===== Lesson Related Api ===== =====//
     // Get API lessons (All and using email).
     app.get("/lessons", async (req, res) => {
-      const { email, privacy } = req.query;
+      const { email, privacy, category, emotionalTone, limit } = req.query;
 
       const query = {};
 
@@ -92,7 +92,20 @@ async function run() {
         query.privacy = "public";
       }
 
-      const cursor = lessonsCollection.find(query).sort({ createdAt: -1 });
+      if (category) {
+        query.category = category;
+      }
+
+      if (emotionalTone) {
+        query.emotionalTone = emotionalTone;
+      }
+
+      const limitNumber = limit ? parseInt(limit) : 0; // 0 means no limit
+
+      const cursor = lessonsCollection
+        .find(query)
+        .sort({ createdAt: -1 })
+        .limit(limitNumber);
       const result = await cursor.toArray();
       res.send(result);
     });
