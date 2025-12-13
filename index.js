@@ -182,7 +182,35 @@ async function run() {
       res.send(result);
     });
 
-    //Delete API Delete lesson.
+    // Update API. Add likes array on lesson
+    app.patch("/lessons/:id/like", async (req, res) => {
+      const { userId } = req.body;
+      const lessonId = req.params.id;
+      const query = { _id: new ObjectId(lessonId) };
+
+      const lesson = await lessonsCollection.findOne(query);
+
+      const alreadyLiked = lesson.likes?.includes(userId);
+
+      const update = alreadyLiked
+        ? {
+            $pull: { likes: userId },
+            $inc: { likesCount: -1 },
+          }
+        : {
+            $addToSet: { likes: userId },
+            $inc: { likesCount: 1 },
+          };
+
+      const result = await lessonsCollection.updateOne(query, update);
+
+      res.send({
+        liked: !alreadyLiked,
+        modifiedCount: result.modifiedCount,
+      });
+    });
+
+    //Delete API. Delete lesson.
     app.delete("/lessons/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -248,7 +276,7 @@ async function run() {
     });
 
     // ===== ===== Favorites Related Api ===== =====//
-    // Get API. 
+    // Get API.
     app.get("/favorites", async (req, res) => {
       const query = {};
 
@@ -268,7 +296,7 @@ async function run() {
       res.send({ isFavorite: !!favorite });
     });
 
-    //Post API. 
+    //Post API.
     app.post("/favorites", async (req, res) => {
       const favorites = req.body;
 
