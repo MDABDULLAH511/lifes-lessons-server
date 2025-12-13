@@ -34,6 +34,7 @@ async function run() {
     const lessonsCollection = db.collection("lessons");
     const commentsCollection = db.collection("comments");
     const reportsCollection = db.collection("lessonReports");
+    const favoritesCollection = db.collection("favoritesLessons");
 
     // ===== ===== Users Related Api ===== =====//
     // Get users API
@@ -243,6 +244,48 @@ async function run() {
 
       // Added new report
       const result = await reportsCollection.insertOne(report);
+      res.send(result);
+    });
+
+    // ===== ===== Favorites Related Api ===== =====//
+    // Get API. 
+    app.get("/favorites", async (req, res) => {
+      const query = {};
+
+      const result = await favoritesCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    //Check Favorites Exits or not
+    app.get("/favorites/check", async (req, res) => {
+      const { lessonId, userEmail } = req.query;
+
+      const favorite = await favoritesCollection.findOne({
+        lessonId,
+        userEmail,
+      });
+
+      res.send({ isFavorite: !!favorite });
+    });
+
+    //Post API. 
+    app.post("/favorites", async (req, res) => {
+      const favorites = req.body;
+
+      // Added new report
+      const result = await favoritesCollection.insertOne(favorites);
+      res.send(result);
+    });
+
+    //Delete API
+    app.delete("/favorites", async (req, res) => {
+      const { lessonId, userEmail } = req.body;
+
+      const result = await favoritesCollection.deleteOne({
+        lessonId,
+        userEmail,
+      });
+
       res.send(result);
     });
 
